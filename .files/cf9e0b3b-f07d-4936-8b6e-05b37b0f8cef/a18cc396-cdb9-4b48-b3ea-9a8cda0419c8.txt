@@ -1,0 +1,23 @@
+Back up the broker using a file manager.
+a
+. 
+Right-click the 
+<broker_instance_dir>
+ folder and select 
+Copy
+.
+b
+. 
+Right-click in the same window and select 
+Paste
+.
+7
+. 
+Change to directory to which you extracted the contents of the compressed archive. For
+example:
+cd \redhat\amq-broker\apache-artemis-2.53.0.redhat-00003\bin
+8
+. 
+Run the 
+artemis upgrade
+ command to upgrade your existing broker…

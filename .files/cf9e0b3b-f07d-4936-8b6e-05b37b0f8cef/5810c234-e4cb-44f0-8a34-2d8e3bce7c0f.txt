@@ -1,0 +1,8 @@
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Table of Contents
+MAKING OPEN SOURCE MORE INCLUSIVE
+CHAPTER 1. OVERVIEW
+1.1. SUPPORTED CONFIGURATIONS
+1.2. DOCUMENT CONVENTIONS
+The sudo command
+About the use of file paths in this…
