@@ -1,5 +1,5 @@
 """
-app.py — Chainlit chat UI for the Artemis RAG assistant.
+app.py — Chainlit chat UI for the AMQ Broker RAG assistant.
 Usage: chainlit run app.py
 Opens at http://127.0.0.1:8000
 """
@@ -15,7 +15,7 @@ async def on_start():
     cl.user_session.set("engine", _engine)
     await cl.Message(
         content=(
-            "**Artemis Ops Expert** is ready.\n\n"
+            "**AMQ Broker Ops Expert** is ready.\n\n"
             "Ask me anything about AMQ Broker configuration, "
             "troubleshooting, HA setup, or performance tuning.\n\n"
             "_Try: \"Why is queue orders.incoming backing up?\"_"
