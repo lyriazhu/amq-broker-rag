@@ -1,0 +1,8 @@
+Learn how to upgrade a 7.13.x broker instance to 7.14.x for different operating systems.
+IMPORTANT
+Starting with AMQ Broker 7.1.0, you can access AMQ Management Console only from the
+local host by default. To learn about configuring remote access to the console, see
+Configuring local and remote access to AMQ Management Console
+.
+2.12.1. Upgrading from 7.13.x to 7.14.x on Linux
+Upgrade from 7.13.x …

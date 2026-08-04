@@ -1,0 +1,22 @@
+For example, to upgrade from 7.12.4 to
+7.14.0, a 7.14.x Operator must be installed.
+spec:
+   
+version:
+ 
+'7.13.0'
+    ...
+spec:
+    
+version:
+ 
+'7.12'
+    ...
+spec:
+    
+version:
+ 
+'7'
+    ...
+Red Hat AMQ Broker 7.14 Deploying AMQ Broker on OpenShift
+160

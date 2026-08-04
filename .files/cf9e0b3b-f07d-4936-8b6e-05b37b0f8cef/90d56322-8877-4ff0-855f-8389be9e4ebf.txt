@@ -1,9 +1,0 @@
-CHAPTER 4. USING AMQ MANAGEMENT CONSOLE
-AMQ Management Console is a web console included in the AMQ Broker installation that enables you to
-use a web browser to manage AMQ Broker.
-AMQ Management Console is based on 
-hawtio
-.
-4.1. OVERVIEW
-AMQ Broker is a full-featured, message-oriented middleware broker. It offers specialized queueing
-behaviors, message persistence, and manageability. It supports …

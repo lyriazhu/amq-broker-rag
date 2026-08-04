@@ -1,0 +1,14 @@
+Upgrading from 7.9.x to 7.10.x on Linux
+Upgrading from 7.9.x to 7.10.x on Windows
+2.9.1. Upgrading from 7.9.x to 7.10.x on Linux
+NOTE
+The name of the archive that you download could differ from what is used in the following
+examples.
+Prerequisites
+At a minimum, AMQ Broker 7.10 requires Java version 11 to run. Ensure that each AMQ Broker
+    ...
+</
+web
+>
+Red Hat AMQ Broker 7.10 Managing AMQ Broker
+…

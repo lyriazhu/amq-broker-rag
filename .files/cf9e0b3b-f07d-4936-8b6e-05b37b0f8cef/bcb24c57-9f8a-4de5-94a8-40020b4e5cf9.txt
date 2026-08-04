@@ -1,8 +1,0 @@
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-Table of Contents
-MAKING OPEN SOURCE MORE INCLUSIVE
-CHAPTER 1. OVERVIEW
-1.1. KEY FEATURES
-1.2. SUPPORTED STANDARDS AND PROTOCOLS
-1.3. SUPPORTED CONFIGURATIONS
-1.4. DOCUMENT CONVE…

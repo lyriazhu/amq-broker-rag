@@ -1,9 +1,0 @@
-CHAPTER 2. UNDERSTANDING AMQ BROKER
-AMQ Broker enables you to loosely couple heterogeneous systems together, while providing reliability,
-transactions, and many other features. Before using AMQ Broker, you should understand the capabilities
-it offers.
-2.1. BROKER INSTANCES
-In AMQ Broker, the installed AMQ Broker software serves as a "home" for one or more 
-broker instances
-.
-This architecture prov…
