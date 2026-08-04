@@ -1,0 +1,252 @@
+/*
+ * IBM Carbon Design System — Chainlit theme override
+ * Carbon Design System: https://carbondesignsystem.com
+ * Targets Chainlit's CSS custom properties and key selectors.
+ * Dark (Gray 100) theme by default; light theme variables also provided.
+ */
+
+/* ───────────────────────────────────────────────
+   1. CARBON DESIGN TOKENS (Gray 100 dark theme)
+─────────────────────────────────────────────── */
+:root {
+  /* Background layers */
+  --background:          #161616;   /* $background */
+  --background-hover:    #1f1f1f;
+  --layer-01:            #262626;   /* $layer-01 */
+  --layer-02:            #393939;   /* $layer-02 */
+  --layer-hover-01:      #2e2e2e;
+
+  /* Text */
+  --text-primary:        #f4f4f4;   /* $text-primary */
+  --text-secondary:      #c6c6c6;   /* $text-secondary */
+  --text-placeholder:    #6f6f6f;
+  --text-disabled:       #525252;
+  --text-on-color:       #ffffff;
+
+  /* Interactive / Brand */
+  --interactive:         #0f62fe;   /* $interactive / IBM Blue 60 */
+  --focus:               #0f62fe;
+  --link-primary:        #78a9ff;   /* $link-primary dark */
+  --link-hover:          #a6c8ff;
+
+  /* Border */
+  --border-subtle:       #393939;
+  --border-strong:       #525252;
+
+  /* Support */
+  --support-error:       #ff8389;
+  --support-success:     #42be65;
+  --support-warning:     #f1c21b;
+  --support-info:        #78a9ff;
+
+  /* Typography — Carbon uses IBM Plex Sans */
+  --font-family:         'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:           'IBM Plex Mono', 'Menlo', 'Courier New', monospace;
+
+  /* Spacing scale (Carbon 4px base) */
+  --spacing-01: 0.125rem;
+  --spacing-02: 0.25rem;
+  --spacing-03: 0.5rem;
+  --spacing-04: 0.75rem;
+  --spacing-05: 1rem;
+  --spacing-06: 1.5rem;
+  --spacing-07: 2rem;
+  --spacing-08: 2.5rem;
+
+  /* Border radius — Carbon uses minimal radius */
+  --radius: 0px;
+}
+
+/* ───────────────────────────────────────────────
+   2. IBM PLEX FONT IMPORT (system fallback safe)
+─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ───────────────────────────────────────────────
+   3. MAP CARBON TOKENS → CHAINLIT CSS VARIABLES
+─────────────────────────────────────────────── */
+
+/* Chainlit exposes theme variables on :root */
+:root {
+  --chainlit-color-bg:           var(--background);
+  --chainlit-color-surface:      var(--layer-01);
+  --chainlit-color-text:         var(--text-primary);
+  --chainlit-color-muted:        var(--text-secondary);
+  --chainlit-color-border:       var(--border-subtle);
+  --chainlit-color-primary:      var(--interactive);
+  --chainlit-color-primary-text: var(--text-on-color);
+}
+
+/* ───────────────────────────────────────────────
+   4. GLOBAL RESETS
+─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  background-color: var(--background) !important;
+  color:            var(--text-primary) !important;
+  font-family:      var(--font-family) !important;
+  font-size:        14px;
+  line-height:      1.5;
+}
+
+/* ───────────────────────────────────────────────
+   5. LAYOUT SHELLS
+─────────────────────────────────────────────── */
+
+/* Main app wrapper */
+.MuiBox-root, main {
+  background-color: var(--background) !important;
+}
+
+/* Sidebar / conversation list */
+aside, [class*="Drawer"], [class*="sidebar"] {
+  background-color: var(--layer-01) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+}
+
+/* Header bar */
+header, [class*="Header"] {
+  background-color: var(--layer-01) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  box-shadow: none !important;
+}
+
+/* ───────────────────────────────────────────────
+   6. CHAT MESSAGES
+─────────────────────────────────────────────── */
+
+/* User message bubble */
+[class*="UserMessage"], [data-testid="user-message"] {
+  background-color: var(--layer-02) !important;
+  border:           1px solid var(--border-subtle) !important;
+  border-radius:    0 !important;
+  color:            var(--text-primary) !important;
+  font-family:      var(--font-family) !important;
+}
+
+/* Assistant message bubble */
+[class*="AssistantMessage"], [data-testid="assistant-message"] {
+  background-color: var(--layer-01) !important;
+  border-left:      2px solid var(--interactive) !important;
+  border-radius:    0 !important;
+  color:            var(--text-primary) !important;
+  font-family:      var(--font-family) !important;
+}
+
+/* ───────────────────────────────────────────────
+   7. INPUT / COMPOSE BAR
+─────────────────────────────────────────────── */
+[class*="InputBox"], [class*="MessageComposer"], textarea {
+  background-color: var(--layer-01) !important;
+  border:           1px solid var(--border-strong) !important;
+  border-radius:    0 !important;
+  color:            var(--text-primary) !important;
+  font-family:      var(--font-family) !important;
+}
+
+[class*="InputBox"]:focus-within,
+textarea:focus {
+  border-color: var(--focus) !important;
+  outline:      2px solid var(--focus) !important;
+  outline-offset: -2px !important;
+}
+
+::placeholder {
+  color: var(--text-placeholder) !important;
+}
+
+/* ───────────────────────────────────────────────
+   8. BUTTONS
+─────────────────────────────────────────────── */
+button, [role="button"] {
+  font-family:   var(--font-family) !important;
+  border-radius: 0 !important;
+}
+
+/* Primary send / action button */
+button[type="submit"],
+[class*="SendButton"],
+[class*="primary"] button {
+  background-color: var(--interactive) !important;
+  color:            var(--text-on-color) !important;
+  border:           none !important;
+  border-radius:    0 !important;
+}
+
+button[type="submit"]:hover,
+[class*="SendButton"]:hover {
+  background-color: #0050e6 !important; /* IBM Blue 70 */
+}
+
+/* Ghost / icon buttons */
+button:not([type="submit"]) {
+  background-color: transparent !important;
+  color:            var(--text-secondary) !important;
+}
+
+button:not([type="submit"]):hover {
+  background-color: var(--layer-hover-01) !important;
+  color:            var(--text-primary) !important;
+}
+
+/* ───────────────────────────────────────────────
+   9. CODE BLOCKS
+─────────────────────────────────────────────── */
+pre, code {
+  font-family:      var(--font-mono) !important;
+  font-size:        13px !important;
+  background-color: var(--layer-02) !important;
+  color:            var(--text-primary) !important;
+  border:           1px solid var(--border-subtle) !important;
+  border-radius:    0 !important;
+}
+
+/* ───────────────────────────────────────────────
+   10. LINKS
+─────────────────────────────────────────────── */
+a {
+  color: var(--link-primary) !important;
+  text-decoration: none;
+}
+a:hover {
+  color:           var(--link-hover) !important;
+  text-decoration: underline;
+}
+
+/* ───────────────────────────────────────────────
+   11. SCROLLBARS (Carbon-style minimal)
+─────────────────────────────────────────────── */
+::-webkit-scrollbar             { width: 4px; height: 4px; }
+::-webkit-scrollbar-track       { background: var(--background); }
+::-webkit-scrollbar-thumb       { background: var(--border-strong); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-placeholder); }
+
+/* ───────────────────────────────────────────────
+   12. MISC UI ELEMENTS
+─────────────────────────────────────────────── */
+
+/* Dividers */
+hr, [class*="Divider"] {
+  border-color: var(--border-subtle) !important;
+}
+
+/* Chips / tags */
+[class*="Chip"], [class*="Tag"], [class*="Badge"] {
+  background-color: var(--layer-02) !important;
+  color:            var(--text-secondary) !important;
+  border-radius:    0 !important;
+  font-family:      var(--font-family) !important;
+  font-size:        12px !important;
+}
+
+/* Tooltips */
+[role="tooltip"], [class*="Tooltip"] {
+  background-color: var(--layer-02) !important;
+  color:            var(--text-primary) !important;
+  border:           1px solid var(--border-strong) !important;
+  border-radius:    0 !important;
+  font-size:        12px !important;
+}

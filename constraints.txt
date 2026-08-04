@@ -1,0 +1,2 @@
+llama-index-core==0.12.6
+chromadb==0.5.23
