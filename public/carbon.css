@@ -175,11 +175,29 @@ header {
   color: #161616 !important;
 }
 
-/* Assistant message — left IBM Blue rule */
-.ai-message,
-[class*="ai-message"] {
-  border-left: 3px solid #0f62fe !important;
-  border-radius: 0 !important;
+/* Replace Chainlit avatar with same-size invisible whitespace */
+.ai-message > span {
+  visibility: hidden !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Assistant message — short IBM Blue accent at top-left */
+[data-step-type="assistant_message"] {
+  position: relative !important;
+}
+
+/* Blue accent bar */
+[data-step-type="assistant_message"]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 40px;
+  background-color: #0f62fe;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -305,4 +323,11 @@ hr {
 }
 .text-destructive-foreground {
   color: #ffffff !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   WATERMARK  (hide "Built with Chainlit" badge)
+──────────────────────────────────────────────────────────── */
+a.watermark {
+  display: none !important;
 }
