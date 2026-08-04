@@ -1,8 +1,28 @@
 """
-app.py — Chainlit chat UI for the AMQ Broker RAG assistant.
+app.py — Chainlit chat UI for AMQ Broker documentation search.
+Retrieves indexed Red Hat documentation and answers questions with source citations.
 Usage: chainlit run app.py
 Opens at http://127.0.0.1:8000
 """
+import warnings
+import logging
+
+# Suppress non-critical warnings
+warnings.filterwarnings("ignore", category=UserWarning, message=".*resource_tracker.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", message=".*UnsupportedFieldAttributeWarning.*")
+warnings.filterwarnings("ignore", message=".*validate_default.*")
+warnings.filterwarnings("ignore", message=".*unauthenticated requests.*")
+
+# Reduce verbosity of specific libraries to suppress debug/info logs
+logging.getLogger("httpx").setLevel(logging.CRITICAL)
+logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+logging.getLogger("huggingface_hub.utils").setLevel(logging.ERROR)
+logging.getLogger("huggingface_hub.repocard").setLevel(logging.ERROR)
+logging.getLogger("chromadb").setLevel(logging.CRITICAL)
+logging.getLogger("chromadb.telemetry").setLevel(logging.CRITICAL)
+logging.getLogger("chromadb.telemetry.events").setLevel(logging.CRITICAL)
+
 from engine import build_chat_engine
 import chainlit as cl
 
@@ -15,10 +35,11 @@ async def on_start():
     cl.user_session.set("engine", _engine)
     await cl.Message(
         content=(
-            "**AMQ Broker Ops Expert** is ready.\n\n"
-            "Ask me anything about AMQ Broker configuration, "
-            "troubleshooting, HA setup, or performance tuning.\n\n"
-            "_Try: \"Why is queue orders.incoming backing up?\"_"
+            "**AMQ Broker Documentation Search** is ready.\n\n"
+            "Search the indexed Red Hat AMQ Broker documentation for "
+            "configuration, troubleshooting, HA setup, and performance tuning. "
+            "Answers are grounded in official Red Hat docs with source citations.\n\n"
+            "_Try: \"How do I configure persistent storage?\"_"
         )
     ).send()
 
