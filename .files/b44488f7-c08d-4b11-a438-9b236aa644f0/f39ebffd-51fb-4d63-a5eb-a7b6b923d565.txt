@@ -1,8 +1,0 @@
-CHAPTER 1. INTRODUCTION TO AMQ BROKER ON
-OPENSHIFT CONTAINER PLATFORM
-Red Hat AMQ Broker 7.14 is a high-performance messaging application that is available as a
-containerized image. AMQ Broker supports all OpenShift Container Platform releases that are in the full
-or maintenance support phases, as well as releases from version 4.14 onward that offer extended
-support.
-Additional resources
-OpenShift…

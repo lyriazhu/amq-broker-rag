@@ -32,10 +32,131 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.chat_engine import CondensePlusContextChatEngine
 from llama_index.core.memory import ChatMemoryBuffer
 from engine import build_chat_engine, SYSTEM_PROMPT
+from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 import chainlit as cl
 import os
 import shutil
 import tempfile
+
+# ---------------------------------------------------------------------------
+# Persist chat history locally in a SQLite database (never committed to git).
+# The .files/ directory stores uploaded file attachments across sessions.
+# Both are listed in .gitignore so they remain machine-local only.
+# ---------------------------------------------------------------------------
+_DB_PATH = os.path.join(os.path.dirname(__file__), "chat_history.sqlite")
+_FILES_DIR = os.path.join(os.path.dirname(__file__), ".files")
+os.makedirs(_FILES_DIR, exist_ok=True)
+
+
+@cl.data_layer
+def get_data_layer():
+    return SQLAlchemyDataLayer(conninfo=f"sqlite+aiosqlite:///{_DB_PATH}")
+
+
+# ---------------------------------------------------------------------------
+# Create the SQLite schema on first run (SQLAlchemyDataLayer does not
+# auto-migrate; tables must exist before any auth or persistence call).
+# ---------------------------------------------------------------------------
+_SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS users (
+    "id"          TEXT PRIMARY KEY,
+    "identifier"  TEXT NOT NULL UNIQUE,
+    "createdAt"   TEXT,
+    "metadata"    TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE TABLE IF NOT EXISTS threads (
+    "id"             TEXT PRIMARY KEY,
+    "createdAt"      TEXT,
+    "name"           TEXT,
+    "userId"         TEXT REFERENCES users("id") ON DELETE CASCADE,
+    "userIdentifier" TEXT,
+    "tags"           TEXT,
+    "metadata"       TEXT
+);
+
+CREATE TABLE IF NOT EXISTS steps (
+    "id"            TEXT PRIMARY KEY,
+    "name"          TEXT NOT NULL,
+    "type"          TEXT NOT NULL,
+    "threadId"      TEXT NOT NULL REFERENCES threads("id") ON DELETE CASCADE,
+    "parentId"      TEXT,
+    "streaming"     INTEGER NOT NULL DEFAULT 0,
+    "waitForAnswer" INTEGER,
+    "isError"       INTEGER,
+    "metadata"      TEXT,
+    "tags"          TEXT,
+    "input"         TEXT,
+    "output"        TEXT,
+    "createdAt"     TEXT,
+    "start"         TEXT,
+    "end"           TEXT,
+    "generation"    TEXT,
+    "showInput"     TEXT,
+    "language"      TEXT,
+    "indent"        INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS elements (
+    "id"           TEXT PRIMARY KEY,
+    "threadId"     TEXT REFERENCES threads("id") ON DELETE CASCADE,
+    "type"         TEXT,
+    "chainlitKey"  TEXT,
+    "url"          TEXT,
+    "objectKey"    TEXT,
+    "name"         TEXT NOT NULL,
+    "display"      TEXT NOT NULL,
+    "size"         TEXT,
+    "language"     TEXT,
+    "page"         INTEGER,
+    "autoPlay"     INTEGER,
+    "playerConfig" TEXT,
+    "forId"        TEXT,
+    "mime"         TEXT,
+    "props"        TEXT
+);
+
+CREATE TABLE IF NOT EXISTS feedbacks (
+    "id"      TEXT PRIMARY KEY,
+    "forId"   TEXT NOT NULL,
+    "value"   INTEGER NOT NULL,
+    "comment" TEXT
+);
+
+CREATE TRIGGER IF NOT EXISTS threads_preserve_created_at
+AFTER UPDATE OF "createdAt" ON threads
+FOR EACH ROW
+WHEN OLD."createdAt" IS NOT NULL
+  AND NEW."createdAt" != OLD."createdAt"
+BEGIN
+    UPDATE threads SET "createdAt" = OLD."createdAt" WHERE id = OLD.id;
+END;
+"""
+
+
+@cl.on_app_startup
+async def on_startup():
+    """Create the SQLite schema on first launch if tables don't exist yet."""
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from sqlalchemy import text
+    engine = create_async_engine(f"sqlite+aiosqlite:///{_DB_PATH}")
+    async with engine.begin() as conn:
+        for statement in _SCHEMA_SQL.strip().split(";"):
+            stmt = statement.strip()
+            if stmt:
+                await conn.execute(text(stmt))
+    await engine.dispose()
+
+
+# ---------------------------------------------------------------------------
+# Auth — a single local user so Chainlit enables its built-in thread history
+# sidebar (pencil icon, conversation list, hover-to-delete).
+# This is a local-only tool; no real password enforcement is needed.
+# ---------------------------------------------------------------------------
+@cl.password_auth_callback
+async def auth_callback(username: str, password: str):
+    return cl.User(identifier=username, metadata={"role": "user"})
+
 
 # Supported upload extensions (matches ingest.py)
 _SUPPORTED_EXTS = {".pdf", ".txt", ".md", ".xml"}
@@ -93,7 +214,8 @@ def _build_upload_engine(file_paths: list[str]) -> CondensePlusContextChatEngine
 async def on_start():
     cl.user_session.set("engine", _base_engine)
     cl.user_session.set("uploaded_files", set())
-    await cl.Message(
+    cl.user_session.set("has_user_message", False)
+    welcome = cl.Message(
         content=(
             "**AMQ Broker Documentation Search** is ready.\n\n"
             "Search the indexed Red Hat AMQ Broker documentation for "
@@ -103,11 +225,34 @@ async def on_start():
             "and they will be included in the search for this session.\n\n"
             "_Try: \"What features are included in AMQ Broker 7.14?\"_"
         )
-    ).send()
+    )
+    welcome.parent_id = None
+    await welcome.send()
+
+
+@cl.on_chat_end
+async def on_end():
+    """Delete the thread when the session closes with no user messages sent."""
+    if cl.user_session.get("has_user_message"):
+        return
+    from chainlit.data import get_data_layer
+    data_layer = get_data_layer()
+    if data_layer:
+        thread_id = cl.context.session.thread_id
+        await data_layer.delete_thread(thread_id=thread_id)
+
+
+@cl.on_chat_resume
+async def on_resume(thread):
+    """Restore the chat engine when a previous conversation is reopened."""
+    cl.user_session.set("engine", _base_engine)
+    cl.user_session.set("uploaded_files", set())
+    cl.user_session.set("has_user_message", True)  # resumed threads always have messages
 
 
 @cl.on_message
 async def on_message(message: cl.Message):
+    cl.user_session.set("has_user_message", True)
     uploaded_files: set = cl.user_session.get("uploaded_files")
 
     # Collect any new supported files attached to this message
@@ -141,7 +286,12 @@ async def on_message(message: cl.Message):
     else:
         engine = cl.user_session.get("engine")
 
+    # Clear parent_id BEFORE send() so the initial create_step call never
+    # writes a parentId to the DB.  The run-wrapper step (on_message / on_chat_start)
+    # that Chainlit sets as parent is never persisted, so any response that
+    # references it becomes invisible when the thread is resumed.
     msg = cl.Message(content="")
+    msg.parent_id = None
     await msg.send()
 
     # Stream tokens into the message as they arrive

@@ -1,9 +1,0 @@
-CHAPTER 17. CONFIGURING A MULTISITE, FAULT-TOLERANT
-MESSAGING SYSTEM BY USING BROKER CONNECTIONS
-Large-scale enterprise messaging systems usually locate broker clusters in geographically distributed
-data centers. You can use AMQP broker connections to create a 
-multisite, fault-tolerant architecture
-,
-which ensures continuity of your messaging system during a data center outage.
-NOTE
-Only the AMQP…

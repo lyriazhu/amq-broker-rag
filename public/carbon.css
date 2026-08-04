@@ -441,3 +441,101 @@ hr {
 a.watermark {
   display: none !important;
 }
+
+/* ─────────────────────────────────────────────────────────
+   15. SONNER TOAST — white, Carbon-style, always-visible ×
+──────────────────────────────────────────────────────────── */
+
+/* Force the toaster to the light theme regardless of OS/app setting */
+[data-sonner-toaster] {
+  --normal-bg:     #ffffff !important;
+  --normal-border: #e0e0e0 !important;
+  --normal-text:   #161616 !important;
+  font-family: var(--font-sans) !important;
+}
+
+/* Toast tile — white background, Carbon border, no rounded corners */
+[data-sonner-toast][data-styled=true] {
+  background:    #ffffff !important;
+  border:        1px solid #e0e0e0 !important;
+  color:         #161616 !important;
+  border-radius: 0 !important;
+  box-shadow:    0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  font-family:   var(--font-sans) !important;
+  font-size:     14px !important;
+  padding:       12px 16px !important;
+}
+
+/* Success toast — thin IBM Blue left accent bar instead of green */
+[data-sonner-toast][data-type=success][data-styled=true] {
+  border-left: 3px solid #0f62fe !important;
+  padding-left: 13px !important;
+}
+
+/* Error toast — Carbon red */
+[data-sonner-toast][data-type=error][data-styled=true] {
+  border-left: 3px solid #da1e28 !important;
+  padding-left: 13px !important;
+}
+
+/* Loading/promise toast (e.g. "Deleting chat…") */
+[data-sonner-toast][data-promise=true][data-styled=true] {
+  border-left: 3px solid #8d8d8d !important;
+  padding-left: 13px !important;
+}
+
+/* Title and description text */
+[data-sonner-toast] [data-title] {
+  color: #161616 !important;
+  font-weight: 500 !important;
+}
+[data-sonner-toast] [data-description] {
+  color: #525252 !important;
+}
+
+/* ── Always-visible × close button ── */
+[data-sonner-toast] [data-close-button] {
+  opacity: 1 !important;           /* always shown, not just on hover */
+  background:    #ffffff !important;
+  border:        1px solid #e0e0e0 !important;
+  border-radius: 0 !important;
+  color:         #525252 !important;
+  width:  20px !important;
+  height: 20px !important;
+  transition: background 0.15s, color 0.15s !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: #f4f4f4 !important;
+  border-color: #8d8d8d !important;
+  color: #161616 !important;
+}
+
+/* Dark mode toasts — Carbon Gray 90 */
+.dark [data-sonner-toaster] {
+  --normal-bg:     #262626 !important;
+  --normal-border: #525252 !important;
+  --normal-text:   #f4f4f4 !important;
+}
+
+.dark [data-sonner-toast][data-styled=true] {
+  background:  #262626 !important;
+  border:      1px solid #525252 !important;
+  color:       #f4f4f4 !important;
+  box-shadow:  0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark [data-sonner-toast] [data-title]       { color: #f4f4f4 !important; }
+.dark [data-sonner-toast] [data-description] { color: #c6c6c6 !important; }
+
+.dark [data-sonner-toast] [data-close-button] {
+  background:   #262626 !important;
+  border-color: #525252 !important;
+  color:        #c6c6c6 !important;
+}
+
+.dark [data-sonner-toast] [data-close-button]:hover {
+  background:   #393939 !important;
+  border-color: #6f6f6f !important;
+  color:        #f4f4f4 !important;
+}

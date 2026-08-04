@@ -1,8 +1,0 @@
-2.8.2. Upgrading from 7.9.x to 7.10.x on Windows
-Download the new archive to upgrade from 7.9.x to 7.10.x on Windows.
-Prerequisites
-At a minimum, AMQ Broker 7.10.x requires Java version 11 to run. Ensure that each AMQ Broker
-host is running Java version 11 or higher. For more information on supported configurations, see
-Red Hat AMQ Broker 7 Supported Configurations
-.
-If AMQ Broker 7.9 is configure…

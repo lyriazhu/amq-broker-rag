@@ -1,5 +1,0 @@
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-15.1.4. Configuring replication high availability
-15.1.4.1. Choosing a coordination method
-15.1.4.2. How brokers coordinate after a replication interruption
-15.1.4.3. Configuri…

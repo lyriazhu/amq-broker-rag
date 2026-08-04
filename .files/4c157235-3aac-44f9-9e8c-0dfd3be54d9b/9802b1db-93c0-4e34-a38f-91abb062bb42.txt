@@ -1,9 +1,0 @@
-CHAPTER 4. USING AMQ MANAGEMENT CONSOLE
-You can manage your AMQ Broker installation in a web browser by using AMQ Management Console,
-which is included in the AMQ Broker installation.
-AMQ Management Console is based on 
-hawtio
-.
-4.1. OVERVIEW
-AMQ Broker is a full-featured, message-oriented middleware broker. It offers specialized queuing
-behaviors, message persistence, and manageability. It suppor…

@@ -174,7 +174,7 @@
             "button": "New Chat",
             "dialog": {
                 "title": "Create New Chat",
-                "description": "This will clear your current chat history. Are you sure you want to continue?",
+                "description": "Your current conversation will be saved and accessible from the sidebar. Start a new chat?",
                 "tooltip": "New Chat"
             }
         },

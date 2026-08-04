@@ -1,8 +1,0 @@
-Additional resources
-Creating a broker instance
-2.11. UPGRADING A BROKER INSTANCE FROM 7.12.X TO 7.13.X
-Learn how to upgrade a 7.12.x broker instance to 7.13.x for different operating systems.
-IMPORTANT
-Starting with AMQ Broker 7.1.0, you can access AMQ Management Console only from the
-local host by default. To learn about configuring remote access to the console, see
-link:https://access.redhat.co…

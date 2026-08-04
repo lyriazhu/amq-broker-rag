@@ -1,7 +1,0 @@
-2.1.2. Upgrading a broker instance from 7.0.x to 7.1.0
-Learn how to upgrade a 7.0.x broker instance to 7.1.0 for different operating systems.
-AMQ Broker 7.1.0 includes configuration files and settings that were not included with previous versions.
-Upgrading a broker instance from 7.0.x to 7.1.0 requires adding these new files and settings to your
-existing 7.0.x broker instances.
-IMPORTANT
-Starting…

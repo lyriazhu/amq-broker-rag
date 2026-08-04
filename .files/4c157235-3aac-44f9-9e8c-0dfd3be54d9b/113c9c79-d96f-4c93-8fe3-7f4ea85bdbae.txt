@@ -1,8 +1,0 @@
-CHAPTER 3. NEW AND CHANGED FEATURES
-This section describes a highlighted set of enhancements and changed features in AMQ Broker 7.13. For
-a full list of enhancements, see 
-AMQ Broker 7.13.0 Enhancements
-FIPS tolerance
-AMQ Broker 7.13 is FIPS-tolerant, which means it automatically runs on a FIPS-enabled OpenShift
-cluster or RHEL system. One caveat is that the broker cannot use the default codec,
-or…

@@ -1,8 +1,0 @@
-CHAPTER 20. TUNING GUIDELINES
-Follow these guidelines to tune AMQ Broker settings for optimal performance.
-20.1. TUNING PERSISTENCE
-Follow these guidelines to improve the performance of the broker when persisting messages.
-The following are suggested steps you can take to improve the broker performance when persisting
-messages.
-Persist messages to a file-based journal.
-Use a file-based journal for…
