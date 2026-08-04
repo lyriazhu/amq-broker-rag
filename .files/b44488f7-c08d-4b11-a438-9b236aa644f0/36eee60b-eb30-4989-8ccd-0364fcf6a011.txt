@@ -1,0 +1,8 @@
+Therefore, journal file sizing is difficult to control precisely.
+Other persistence-related features that the broker uses are:
+A 
+garbage collection
+ algorithm that determines whether a particular journal file is still in use. If
+the journal file is no longer in use, the broker can reclaim the file for reuse.
+A compaction algorithm that removes dead space from the journal and compresses the data.
+…

@@ -1,0 +1,19 @@
+2.1.3.1. Upgrading from 7.1.x to 7.2.0 on Linux
+Download the new archive to upgrade from 7.1.x to 7.2.0 on Linux.
+Procedure
+1
+. 
+Download the required archive from the Red Hat Customer Portal by following the instructions
+provided in 
+Downloading the AMQ Broker archive
+.
+2
+. 
+Change the owner of the archive to the same user that owns the AMQ Broker installation to be
+upgraded.
+<
+app
+ 
+url
+=
+"conso…

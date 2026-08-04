@@ -1,0 +1,26 @@
+1
+. 
+Open the 
+<broker_instance_dir>
+/etc/broker.xml
+ configuration file.
+2
+. 
+In the 
+core
+ element, set the value of 
+security-enabled
+ to 
+false
+.
+3
+. 
+If necessary, specify a new value, in milliseconds, for 
+security-invalidation-interval
+. The value
+of this property specifies when the broker periodically invalidates secure logins. The default
+value is 
+10000
+.
+5.8. DISABLING FIPS MODE
+FIPS is…

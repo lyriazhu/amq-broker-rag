@@ -1,0 +1,5 @@
+The following is an example feature configuration.
+-Dorg.apache.activemq.documentBuilderFactory.feature:http://xml.org/sax/features/external-general-
+entities=true
+CHAPTER 13. FILTERING MESSAGES
+197

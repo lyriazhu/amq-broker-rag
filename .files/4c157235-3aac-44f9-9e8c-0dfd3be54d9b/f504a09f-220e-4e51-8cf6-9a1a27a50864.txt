@@ -1,0 +1,12 @@
+journal-pool-files
+The system will create as many files as needed; however, when reclaiming
+files it will shrink back to 
+journal-pool-files
+.
+The default value is 
+-1
+, meaning it will never delete files on the journal once
+created. The system cannot grow infinitely, however, as you are still required
+to use paging for destinations that can grow indefinitely.
+journal-max-io
+Controls the maximum n…

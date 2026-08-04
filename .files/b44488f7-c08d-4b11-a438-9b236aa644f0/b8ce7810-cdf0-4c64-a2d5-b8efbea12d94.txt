@@ -1,0 +1,7 @@
+CHAPTER 19. TUNING GUIDELINES
+Review the following guidelines to tune AMQ Broker.
+19.1. TUNING PERSISTENCE
+Review the following information for tips on improving persistence performance.
+Persist messages to a file-based journal.
+Use a file-based journal for message persistence. AMQ Broker can also persist messages to a
+Java Database Connectivity (JDBC) database, but this has a performance cost whe…

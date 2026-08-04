@@ -1,0 +1,10 @@
+CHAPTER 25. MESSAGING JOURNAL CONFIGURATION
+ELEMENTS
+You can configure various configuration elements for the AMQ Broker messaging journal.
+The table below lists all of the configuration elements related to the AMQ Broker messaging journal.
+Table 25.1. Journal configuration elements
+Name
+Description
+journal-directory
+The directory where the message journal is located. The default value is 
+<broker…

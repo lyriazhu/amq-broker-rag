@@ -1,0 +1,8 @@
+CHAPTER 2. UPGRADING YOUR BROKER
+Red Hat releases new versions of AMQ Broker to the 
+Customer Portal
+. Learn how to upgrade your AMQ
+Broker instances to the latest version to access new features and security fixes.
+In general, Red Hat releases a new version of AMQ Broker in one of three ways:
+Major Release
+A major upgrade or migration is required when an application is transitioned from one major …

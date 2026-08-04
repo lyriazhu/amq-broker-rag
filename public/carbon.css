@@ -32,8 +32,7 @@
       so the IBM Blue palette wins regardless of OS preference
       or the Chainlit theme toggle)
 ──────────────────────────────────────────────────────────── */
-:root,
-.dark {
+:root {
   --font-sans: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'IBM Plex Mono', 'Menlo', 'Courier New', monospace;
 
@@ -78,6 +77,63 @@
   --sidebar-accent:            0   0%  88%;
   --sidebar-accent-foreground: 0   0%   9%;
   --sidebar-border:            0   0%  88%;
+  --sidebar-ring:            221  99%  52%;
+}
+
+/* ─────────────────────────────────────────────────────────
+   1b. DARK MODE TOKENS  (Carbon Gray 90 / Gray 100 palette)
+       $background     #161616  →  0  0%   9%
+       $layer-01       #262626  →  0  0%  15%
+       $layer-02       #393939  →  0  0%  22%
+       $text-primary   #f4f4f4  →  0  0%  96%
+       $text-secondary #c6c6c6  →  0  0%  78%
+       $border-subtle  #525252  →  0  0%  32%
+       $border-strong  #6f6f6f  →  0  0%  44%
+──────────────────────────────────────────────────────────── */
+.dark {
+  --font-sans: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Menlo', 'Courier New', monospace;
+
+  /* backgrounds — Carbon Gray 100 / 90 */
+  --background:              0   0%   9%;   /* #161616 */
+  --foreground:              0   0%  96%;   /* #f4f4f4 */
+
+  --card:                    0   0%  15%;   /* #262626 */
+  --card-foreground:         0   0%  96%;
+
+  --popover:                 0   0%  15%;   /* #262626 */
+  --popover-foreground:      0   0%  96%;
+
+  /* IBM Blue 60 stays the same in dark mode */
+  --primary:               221  99%  52%;
+  --primary-foreground:      0   0% 100%;
+
+  --secondary:               0   0%  22%;   /* #393939 */
+  --secondary-foreground:    0   0%  96%;
+
+  --muted:                   0   0%  22%;   /* #393939 */
+  --muted-foreground:        0   0%  78%;   /* #c6c6c6 */
+
+  --accent:                221  60%  20%;   /* dark blue tint */
+  --accent-foreground:     221  99%  75%;
+
+  --destructive:           357  76%  48%;
+  --destructive-foreground:  0   0% 100%;
+
+  --border:                  0   0%  32%;   /* #525252 */
+  --input:                   0   0%  22%;   /* #393939 */
+  --ring:                  221  99%  52%;
+
+  --radius: 0rem;
+
+  /* sidebar */
+  --sidebar-background:        0   0%  15%;   /* #262626 */
+  --sidebar-foreground:        0   0%  96%;
+  --sidebar-primary:         221  99%  52%;
+  --sidebar-primary-foreground:0   0% 100%;
+  --sidebar-accent:            0   0%  22%;   /* #393939 */
+  --sidebar-accent-foreground: 0   0%  96%;
+  --sidebar-border:            0   0%  32%;   /* #525252 */
   --sidebar-ring:            221  99%  52%;
 }
 
@@ -157,7 +213,7 @@ textarea,
    5. HEADER — thin border, no shadow
 ──────────────────────────────────────────────────────────── */
 header {
-  border-bottom: 1px solid hsl(0 0% 88%) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
   box-shadow: none !important;
 }
 
@@ -165,7 +221,7 @@ header {
    6. CHAT MESSAGES
 ──────────────────────────────────────────────────────────── */
 
-/* User message — $layer-02 tile */
+/* User message — light: $layer-02 tile */
 .user-message,
 [data-testid="user-message"],
 [class*="user-message"] {
@@ -173,6 +229,15 @@ header {
   border: 1px solid #c6c6c6 !important;
   border-radius: 0 !important;
   color: #161616 !important;
+}
+
+/* User message — dark: Carbon Gray 80 tile */
+.dark .user-message,
+.dark [data-testid="user-message"],
+.dark [class*="user-message"] {
+  background-color: #393939 !important;
+  border: 1px solid #525252 !important;
+  color: #f4f4f4 !important;
 }
 
 /* Replace Chainlit avatar with same-size invisible whitespace */
@@ -213,8 +278,29 @@ textarea,
   font-family: var(--font-sans) !important;
 }
 
+/* Dark mode compose bar — Carbon Gray 90 */
+.dark textarea,
+.dark [class*="message-composer"],
+.dark [id="message-composer"] {
+  background-color: #262626 !important;
+  border: 1px solid #6f6f6f !important;
+  color: #f4f4f4 !important;
+}
+
 textarea:focus,
 [class*="message-composer"]:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   9. BUTTON FOCUS — kill the default pink/rose focus ring
+      and replace with IBM Blue 60 or none for icon buttons
+──────────────────────────────────────────────────────────── */
+button:focus,
+button:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -272,6 +358,14 @@ pre, code {
   color: #161616 !important;
 }
 
+/* Dark mode code blocks — Carbon Gray 90 */
+.dark pre,
+.dark code {
+  background-color: #262626 !important;
+  border: 1px solid #525252 !important;
+  color: #f4f4f4 !important;
+}
+
 /* ─────────────────────────────────────────────────────────
    11. LINKS — Carbon $link-primary (Blue 70 on white bg)
 ──────────────────────────────────────────────────────────── */
@@ -284,6 +378,14 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Dark mode links — Carbon $link-primary-light (Blue 40) */
+.dark a:not(.watermark) {
+  color: #78a9ff !important;
+}
+.dark a:not(.watermark):hover {
+  color: #a6c8ff !important;
+}
+
 /* ─────────────────────────────────────────────────────────
    12. SCROLLBARS — Carbon minimal
 ──────────────────────────────────────────────────────────── */
@@ -292,11 +394,19 @@ a:hover {
 ::-webkit-scrollbar-thumb       { background: #8d8d8d; border-radius: 0; }
 ::-webkit-scrollbar-thumb:hover { background: #525252; }
 
+.dark ::-webkit-scrollbar-track       { background: #161616; }
+.dark ::-webkit-scrollbar-thumb       { background: #6f6f6f; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
 /* ─────────────────────────────────────────────────────────
    13. MISC — tooltips, dividers
 ──────────────────────────────────────────────────────────── */
 hr {
   border-color: #e0e0e0 !important;
+}
+
+.dark hr {
+  border-color: #525252 !important;
 }
 
 [role="tooltip"],

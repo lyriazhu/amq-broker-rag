@@ -1,0 +1,6 @@
+CHAPTER 1. OVERVIEW
+AMQ Broker is a high-performance messaging system based on Apache Artemis. It supports fast
+message persistence and multiple protocols, languages, and platforms.
+AMQ Broker provides multiple interfaces for managing and interacting with your broker instances, such
+as a management console, management APIs, and a command-line interface. In addition, you can
+monitor broker performa…

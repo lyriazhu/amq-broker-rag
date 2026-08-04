@@ -1,0 +1,11 @@
+Maximum number of write requests that can be in the IO queue at any one time. If the queue
+becomes full, the broker blocks further writes until space is available.
+If you are using NIO, this value should always be 
+1
+. If you are using AIO andthis parameter not
+explicitly specified in your configuration, the default value is 
+500
+.
+2
+. 
+Based on the preceding descriptions, adjust your persistence …

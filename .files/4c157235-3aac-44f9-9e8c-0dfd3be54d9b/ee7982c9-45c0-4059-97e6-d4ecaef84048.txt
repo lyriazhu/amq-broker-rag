@@ -1,0 +1,6 @@
+Most of the journal is written in Java. However, interaction with the actual file system is abstracted, so
+that you can use different, pluggable implementations. AMQ Broker includes the following
+implementations:
+NIO
+NIO (New I/O) uses standard Java NIO to interface with the file system. This provides extremely
+good performance and runs on any platform with a Java 6 or later runtime. For more info…

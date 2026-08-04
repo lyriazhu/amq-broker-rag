@@ -1,0 +1,8 @@
+CHAPTER 1. OVERVIEW
+AMQ Broker is a high-performance messaging implementation based on Apache Artemis. It uses an
+asynchronous journal for fast message persistence, and supports multiple languages, protocols, and
+platforms.
+1.1. KEY FEATURES
+Review the key features of AMQ Broker, including clustering, high availability, native-IO persistence, and
+support for XA transactions.
+AMQ Broker provides th…

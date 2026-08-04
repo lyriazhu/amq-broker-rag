@@ -1,0 +1,54 @@
+UPGRADING A BROKER INSTANCE FROM 7.10.X TO 7.11.X
+2.9.1. Upgrading from 7.10.x to 7.11.x on Linux
+2.9.2. Upgrading from 7.10.x to 7.11.x on Windows
+5
+6
+6
+6
+6
+6
+6
+8
+8
+8
+8
+9
+11
+11
+12
+14
+14
+16
+17
+17
+18
+19
+21
+21
+22
+24
+24
+26
+27
+27
+29
+30
+30
+32
+34
+34
+36
+38
+38
+40
+41
+42
+43
+45
+45
+48
+50
+50
+53
+Table of Contents
+1

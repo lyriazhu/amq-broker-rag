@@ -40,10 +40,10 @@ import tempfile
 # Supported upload extensions (matches ingest.py)
 _SUPPORTED_EXTS = {".pdf", ".txt", ".md", ".xml"}
 
-# Build the base engine once when the server starts (index stays in RAM)
-_engine = build_chat_engine()
-# Keep a reference to the base retriever for merging with per-session uploads
-_base_retriever = _engine._retriever
+# Build a base engine at startup to warm up the embedding model and hold a
+# reference to the shared retriever needed for upload-fused queries.
+_base_engine = build_chat_engine()
+_base_retriever = _base_engine._retriever
 
 
 def _build_upload_engine(file_paths: list[str]) -> CondensePlusContextChatEngine:
@@ -91,7 +91,7 @@ def _build_upload_engine(file_paths: list[str]) -> CondensePlusContextChatEngine
 
 @cl.on_chat_start
 async def on_start():
-    cl.user_session.set("engine", _engine)
+    cl.user_session.set("engine", _base_engine)
     cl.user_session.set("uploaded_files", set())
     await cl.Message(
         content=(
@@ -101,14 +101,13 @@ async def on_start():
             "Answers are grounded in official Red Hat docs with source citations.\n\n"
             "You can also **upload your own files** (`.pdf`, `.txt`, `.md`, `.xml`) "
             "and they will be included in the search for this session.\n\n"
-            "_Try: \"How do I configure persistent storage?\"_"
+            "_Try: \"What features are included in AMQ Broker 7.14?\"_"
         )
     ).send()
 
 
 @cl.on_message
 async def on_message(message: cl.Message):
-    engine = cl.user_session.get("engine")
     uploaded_files: set = cl.user_session.get("uploaded_files")
 
     # Collect any new supported files attached to this message
@@ -135,6 +134,12 @@ async def on_message(message: cl.Message):
         await thinking.remove()
         names = ", ".join(os.path.basename(p) for p in new_files)
         await cl.Message(content=f"✅ Indexed **{names}** — now included in this session's search.").send()
+    elif not uploaded_files:
+        # No uploads active — rebuild a version-scoped engine for this query so
+        # that mentions of e.g. "7.14" filter retrieval to the right documents.
+        engine = await cl.make_async(build_chat_engine)(message.content)
+    else:
+        engine = cl.user_session.get("engine")
 
     msg = cl.Message(content="")
     await msg.send()

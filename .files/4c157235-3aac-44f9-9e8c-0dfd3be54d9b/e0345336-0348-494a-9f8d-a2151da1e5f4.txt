@@ -1,0 +1,13 @@
+CHAPTER 24. COMMAND-LINE TOOLS
+AMQ Broker includes a set of command-line interface (CLI) commands that you can use to manage
+some aspects of your broker.
+The table below describes each CLI command.
+Table 24.1. Command-line tools
+Command
+Description
+pwd
+Provides information on current folder and instance.
+producer
+Sends message(s) to a broker.
+transfer
+Moves messages from one JMS destination toward…

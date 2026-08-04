@@ -1,0 +1,14 @@
+persistence-enabled
+If the value of this parameter is set to 
+true
+, the broker uses the file-based journal for
+message persistence.
+journal-type
+Type of journal to use. If set to 
+ASYNCIO
+, the broker first attempts to use AIO. If AIO is not
+found, the broker uses NIO.
+bindings-directory
+File system location of the bindings journal. The default value is relative to the 
+<broker_instance_dir>
+ dir…

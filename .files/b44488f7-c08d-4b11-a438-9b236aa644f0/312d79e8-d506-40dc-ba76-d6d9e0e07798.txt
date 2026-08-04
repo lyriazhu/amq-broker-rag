@@ -1,0 +1,27 @@
+Procedure
+1
+. 
+If it is running, stop the 7.0.x broker you want to upgrade.
+$ 
+<broker_instance_dir>
+/bin/artemis stop
+2
+. 
+Back up the instance directory of the broker by copying it to the home directory of the current
+user.
+cp -r 
+<broker_instance_dir>
+ ~/
+3
+. 
+Open the file 
+artemis.profile
+ in the 
+<broker_instance_dir>
+/etc/
+ directory of the 7.0.x broker.
+a
+. 
+Update the 
+ARTEMIS_HOME
+ prope…

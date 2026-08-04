@@ -1,0 +1,16 @@
+If this parameter not explicitly specified in your configuration, the default value for
+NIO is 3333333 nanoseconds (that is, 300 times per second). The default value for AIO is
+50000 nanoseconds (that is, 2000 times per second).
+journal-max-io
+Maximum number of write requests that can be in the IO queue at any one time. If the queue
+    
+<
+journal-datasync
+>
+true
+</
+journal-datasync
+>
+    
+<
+journ…

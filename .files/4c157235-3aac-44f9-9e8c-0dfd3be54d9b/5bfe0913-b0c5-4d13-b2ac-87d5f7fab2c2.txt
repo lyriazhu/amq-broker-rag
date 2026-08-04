@@ -1,0 +1,6 @@
+CHAPTER 6. PERSISTING MESSAGE DATA
+Persisting messages means that messages are saved to disk and survive broker restarts, which protects
+against data loss. AMQ Broker can persist messages in journals on the file system or in a database.
+Alternatively, you can use AMQ Broker with message persistence disabled.
+Persisting messages in journals
+This is the default option. Journal-based persistence is a…
