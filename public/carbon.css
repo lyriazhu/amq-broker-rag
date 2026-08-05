@@ -552,13 +552,44 @@ a.watermark {
 ──────────────────────────────────────────────────────────── */
 
 /* ── 16a. Resizable sidebar width ──
-   The sidebar panel uses w-[--sidebar-width] which reads from an inline style
-   var on the wrapper. We override the panel itself to be user-resizable.       */
-[data-sidebar="sidebar"] {
-  resize: horizontal !important;
-  overflow: hidden auto !important;
-  min-width: 160px !important;
-  max-width: 520px !important;
+   A drag handle div (#sidebar-drag-handle) is injected by JS at the right
+   edge of the sidebar panel. z-index 30 sits above the sidebar rail button
+   (z-index 20) so it receives pointer events first.
+   The sidebar fixed panel has a 150ms width transition which causes lag
+   during drag — disable it while dragging via .sidebar-dragging on <body>. */
+/* Disable sidebar width transition while dragging */
+body.sidebar-dragging [class*="transition-"] {
+  transition: none !important;
+}
+#sidebar-drag-handle {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  margin-left: -4px;
+  cursor: col-resize;
+  z-index: 30;
+  background: transparent;
+}
+/* Visible 2px line via ::after, only shown on hover/drag */
+#sidebar-drag-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background 0.12s;
+}
+#sidebar-drag-handle:hover::after,
+#sidebar-drag-handle.dragging::after {
+  background: #8d8d8d;
+}
+/* Hide the sidebar rail toggle button (the collapse-on-drag handle Chainlit
+   renders at z-index 20 on the right edge — it conflicts with our handle) */
+[data-sidebar="rail"] {
+  display: none !important;
 }
 
 /* ── 16b. Neutral conversation / thread name color ──

@@ -146,4 +146,158 @@
 
   toastObserver.observe(document.body, { childList: true, subtree: true });
 
+
+  /* ── 3. Sidebar drag-to-resize ──
+   *
+   * Problem: React controls the wrapper's inline style and resets
+   * --sidebar-width back to "16rem" on every re-render, so
+   * style.setProperty() is immediately clobbered.
+   *
+   * Solution: inject a <style> tag into <head> targeting the wrapper by its
+   * Tailwind class.  CSS custom properties with !important beat inline styles
+   * per spec (CSS Cascading L4), so our value survives React re-renders.
+   *
+   *   .group\/sidebar-wrapper { --sidebar-width: Xpx !important; }
+   *
+   * DOM structure (confirmed from compiled bundle):
+   *   div.group\/sidebar-wrapper          ← wrapper; inline style has --sidebar-width
+   *     div.w-[--sidebar-width]           ← spacer (pushes main content right)
+   *     div.fixed.w-[--sidebar-width]     ← visible panel
+   *       div[data-sidebar="sidebar"]
+   */
+  const SIDEBAR_MIN = 160;   // px
+  const SIDEBAR_MAX = 520;   // px
+  const SIDEBAR_KEY = 'cl_sidebar_width';
+
+  // <style> tag injected into <head> – survives React re-renders because
+  // !important in an author stylesheet beats inline styles (CSS Cascade L4).
+  let _styleEl = null;
+
+  function getOrCreateStyleEl() {
+    if (!_styleEl) {
+      _styleEl = document.getElementById('sidebar-width-override');
+      if (!_styleEl) {
+        _styleEl = document.createElement('style');
+        _styleEl.id = 'sidebar-width-override';
+        document.head.appendChild(_styleEl);
+      }
+    }
+    return _styleEl;
+  }
+
+  function getSidebarWrapper() {
+    // getElementsByClassName uses literal token – no CSS escaping needed
+    return document.getElementsByClassName('group/sidebar-wrapper')[0] || null;
+  }
+
+  // Return the sidebar's current rendered width in px.
+  // getBoundingClientRect on the actual panel is the most reliable approach —
+  // getComputedStyle on a custom property returns a raw string like " 16rem",
+  // so parseFloat gives 16 (not 256), which puts the handle in the wrong place.
+  function getCurrentWidthPx() {
+    const wrapper = getSidebarWrapper();
+    if (!wrapper) return 256;
+    const panel = wrapper.querySelector('[data-sidebar="sidebar"]');
+    if (panel) return panel.getBoundingClientRect().width || 256;
+    return 256;
+  }
+
+  function applySidebarWidth(px) {
+    const clamped = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, Math.round(px)));
+    // .group\/sidebar-wrapper  — \/ is the CSS escape for a literal /
+    // In a JS string, \\/ produces the two-char sequence \/ at runtime.
+    getOrCreateStyleEl().textContent =
+      '.group\\/sidebar-wrapper{--sidebar-width:' + clamped + 'px!important}';
+    try { localStorage.setItem(SIDEBAR_KEY, clamped); } catch (_) {}
+    return clamped;
+  }
+
+  // Position the handle flush with the right edge of the sidebar panel.
+  function positionHandle(handle) {
+    const panel = document.querySelector('[data-sidebar="sidebar"]');
+    if (!panel) return;
+    const right = panel.getBoundingClientRect().right;
+    if (right > 0) handle.style.left = (right - 3) + 'px';
+  }
+
+  function initSidebarResize() {
+    if (document.getElementById('sidebar-drag-handle')) return;
+    const wrapper = getSidebarWrapper();
+    if (!wrapper) return;
+
+    // Restore persisted width before first paint
+    try {
+      const saved = parseInt(localStorage.getItem(SIDEBAR_KEY), 10);
+      if (saved >= SIDEBAR_MIN && saved <= SIDEBAR_MAX) applySidebarWidth(saved);
+    } catch (_) {}
+
+    const handle = document.createElement('div');
+    handle.id = 'sidebar-drag-handle';
+    document.body.appendChild(handle);
+    // Poll every 50ms until the panel has a non-zero right edge, then stop.
+    const initInterval = setInterval(() => {
+      const p = document.querySelector('[data-sidebar="sidebar"]');
+      if (p && p.getBoundingClientRect().right > 0) {
+        positionHandle(handle);
+        clearInterval(initInterval);
+      }
+    }, 50);
+
+    let startX = 0;
+    let startW = 0;
+    let dragging = false;
+
+    // ResizeObserver keeps the handle in sync when sidebar toggles open/close.
+    // We pause it during drag to avoid it fighting with onMove.
+    const ro = new ResizeObserver(() => {
+      if (!dragging) positionHandle(handle);
+    });
+    ro.observe(wrapper);
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      startW = getCurrentWidthPx();
+      handle.classList.add('dragging');
+      document.body.classList.add('sidebar-dragging');   // kills CSS transitions
+      document.body.style.userSelect = 'none';
+
+      function onMove(ev) {
+        applySidebarWidth(startW + (ev.clientX - startX));
+        // Always derive handle position from the panel's actual rendered edge,
+        // never from the requested width, so they never diverge.
+        positionHandle(handle);
+      }
+
+      function onUp() {
+        dragging = false;
+        handle.classList.remove('dragging');
+        document.body.classList.remove('sidebar-dragging');
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        positionHandle(handle);
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+
+  // Try immediately (script runs deferred — React may already be painted)
+  // and also watch for future mutations in case it's not ready yet.
+  function tryInit() {
+    if (!document.getElementById('sidebar-drag-handle') && getSidebarWrapper()) {
+      initSidebarResize();
+    }
+  }
+
+  tryInit();
+  setTimeout(tryInit, 500);
+  setTimeout(tryInit, 1500);
+
+  const sidebarInitObserver = new MutationObserver(tryInit);
+  sidebarInitObserver.observe(document.body, { childList: true, subtree: true });
+
 })();
