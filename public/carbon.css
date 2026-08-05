@@ -217,6 +217,22 @@ header {
   box-shadow: none !important;
 }
 
+/* Inject logo into the left slot of the header */
+#header > div:first-child::before {
+  content: '';
+  display: block;
+  width: 180px;
+  height: 48px;
+  background-image: url('/logo?theme=light');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: left center;
+  flex-shrink: 0;
+}
+.dark #header > div:first-child::before {
+  background-image: url('/logo?theme=dark');
+}
+
 /* ─────────────────────────────────────────────────────────
    6. CHAT MESSAGES
 ──────────────────────────────────────────────────────────── */
