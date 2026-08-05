@@ -11,85 +11,110 @@
 
   /* ── 0. Suppress auto-scroll on the Chainlit message list ──
 
-     How Chainlit scrolls (from minified source analysis):
-       1. a.current.scrollTop = a.current.scrollHeight
-          — fires whenever messages update (direct property assignment)
-       2. a.current.scrollTo({ top: a.current.scrollHeight, behavior: "smooth" })
-          — fires when user clicks the "scroll to bottom" button (OK to keep)
+     Chainlit source analysis (xNt component in index-B28WSRhf.js):
 
-     The scrollable container is a <div> with class "flex flex-col flex-grow overflow-y-auto".
-     We detect it once, then freeze its scrollTop via a property descriptor override
-     so that Chainlit's direct assignment becomes a no-op.                           */
+     DOM structure:
+       div.relative.flex.flex-col.flex-grow.overflow-y-auto   ← OUTER wrapper
+         div[ref=a].flex.flex-col.flex-grow.overflow-y-auto   ← INNER scrollable ref
+           ...messages...
+           div[ref=i].flex-shrink-0                           ← spacer
+         {l ? <button onClick={E}>ChevronDown</button> : null}  ← scroll-to-bottom btn
 
-  function isChatScrollContainer(el) {
-    if (!el || el.nodeType !== 1) return false;
-    const cls = typeof el.className === 'string' ? el.className : '';
-    return cls.includes('overflow-y-auto') && cls.includes('flex-grow');
+     Auto-scroll (in f(), triggered on every message update):
+       a.current.scrollTop = a.current.scrollHeight          ← direct assignment
+
+     Scroll-to-bottom button click (E()):
+       a.current.scrollTo({top: a.current.scrollHeight, behavior:"smooth"})
+       c(false)   ← hides the button immediately
+       m()        ← debounce: reads scrollTop after 100ms, re-evaluates visibility
+
+     onScroll handler (k()):
+       const R = scrollTop + clientHeight >= scrollHeight - 10
+       c(!R)      ← shows button when not at bottom, hides when at bottom
+
+     Strategy:
+       - Intercept direct `scrollTop =` assignments on the inner container via a
+         property descriptor, blocked only when the user has scrolled up.
+       - Do NOT intercept `scrollTo()` at all — let E() and k() run normally.
+       - The descriptor's getter MUST return the real native value so Chainlit's
+         debounce (m()) and visibility logic (k()) see accurate positions.       */
+
+  // ── Identify the inner scroll container ──
+  // It is the inner of the two overflow-y-auto.flex-grow divs.
+  function getInnerScrollContainer() {
+    const all = document.querySelectorAll('div.overflow-y-auto.flex-grow');
+    // The inner one has no overflow-y-auto child that is also flex-grow,
+    // or is simply the last one found nested inside another match.
+    let inner = null;
+    all.forEach(el => {
+      // If another candidate contains this one, this is the inner.
+      let isInner = false;
+      all.forEach(other => {
+        if (other !== el && other.contains(el)) isInner = true;
+      });
+      if (isInner) inner = el;
+    });
+    return inner || all[all.length - 1] || null;
   }
 
-  // Patch Element.prototype.scrollTo so that smooth-scroll-to-bottom calls
-  // from the message list are suppressed (but not from other components).
-  const _origElementScrollTo = Element.prototype.scrollTo;
-  Element.prototype.scrollTo = function (...args) {
-    if (isChatScrollContainer(this)) {
-      // Allow only explicit user-initiated "scroll to bottom" button clicks
-      // by checking whether the call comes with behavior:"smooth" AND the
-      // page already had user interaction (click). We suppress all others.
-      const opts = args[0];
-      if (opts && typeof opts === 'object' && opts.top !== undefined) {
-        // This is Chainlit scrolling the list to bottom — suppress it.
-        return;
-      }
-    }
-    return _origElementScrollTo.apply(this, args);
-  };
-
-  // Intercept direct scrollTop assignments via a property descriptor on the
-  // specific container element once it appears in the DOM.
   let _patchedContainer = null;
+  let _userScrolledUp = false; // true = user scrolled away from bottom → block auto-scroll
+
+  function getNativeScrollTopDesc(el) {
+    let proto = Object.getPrototypeOf(el);
+    while (proto) {
+      const desc = Object.getOwnPropertyDescriptor(proto, 'scrollTop');
+      if (desc) return desc;
+      proto = Object.getPrototypeOf(proto);
+    }
+    return null;
+  }
 
   function patchScrollContainer(el) {
-    if (_patchedContainer === el) return; // already patched
+    if (_patchedContainer === el) return;
     _patchedContainer = el;
 
-    let _frozenScrollTop = el.scrollTop;
+    const nativeDesc = getNativeScrollTopDesc(el);
+    if (!nativeDesc) return;
 
     Object.defineProperty(el, 'scrollTop', {
       configurable: true,
-      get() { return _frozenScrollTop; },
+      // Always return the real value so Chainlit's visibility logic works.
+      get() {
+        return nativeDesc.get.call(this);
+      },
       set(v) {
-        // Allow the value to be read naturally, but swallow writes that
-        // would push the view to the bottom (scrollHeight).
-        // We detect "scroll to bottom" by checking if the value equals
-        // or is very close to scrollHeight.
-        const threshold = this.scrollHeight - 50;
-        if (v >= threshold && v > 0) {
-          return; // Chainlit trying to jump to bottom — ignore
+        // Only block the write when the user has scrolled up AND the write
+        // is trying to jump to the very bottom (Chainlit's auto-scroll).
+        if (_userScrolledUp) {
+          const threshold = this.scrollHeight - 50;
+          if (v >= threshold && v > 0) {
+            return; // Suppress Chainlit's programmatic jump-to-bottom.
+          }
         }
-        // Normal scroll (user dragging scrollbar, etc.) — allow it.
-        _frozenScrollTop = v;
-        // Apply via the prototype to avoid recursion.
-        const proto = Object.getPrototypeOf(this);
-        const desc = Object.getOwnPropertyDescriptor(proto, 'scrollTop') ||
-                     Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop') ||
-                     Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollTop');
-        if (desc && desc.set) desc.set.call(this, v);
+        nativeDesc.set.call(this, v);
       }
     });
   }
 
-  // Watch for the container to appear and patch it.
+  // Watch for the inner container to appear.
   const scrollPatchObserver = new MutationObserver(() => {
-    // Chainlit renders: outer div.relative.flex.flex-col.flex-grow.overflow-y-auto
-    //                     └─ inner div.flex.flex-col.flex-grow.overflow-y-auto  ← ref:a
-    const candidates = document.querySelectorAll('div.overflow-y-auto.flex-grow');
-    candidates.forEach(el => {
-      if (isChatScrollContainer(el) && el !== _patchedContainer) {
-        patchScrollContainer(el);
-      }
-    });
+    const el = getInnerScrollContainer();
+    if (el && el !== _patchedContainer) {
+      patchScrollContainer(el);
+      // Attach a scroll listener to track position.
+      // Use capture:false so Chainlit's own onScroll (k) runs first.
+      el.addEventListener('scroll', onContainerScroll, { passive: true });
+    }
   });
   scrollPatchObserver.observe(document.body, { childList: true, subtree: true });
+
+  function onContainerScroll() {
+    const el = _patchedContainer;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+    _userScrolledUp = !atBottom;
+  }
 
 
   /* ── 1. Skip new-chat confirmation dialog ── */

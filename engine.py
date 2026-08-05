@@ -11,8 +11,9 @@ load_dotenv()
 
 import chromadb
 from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core.chat_engine import CondensePlusContextChatEngine
 from llama_index.core.memory import ChatMemoryBuffer
-from llama_index.core.postprocessor import SimilarityPostprocessor
+from llama_index.core.retrievers import QueryFusionRetriever
 from llama_index.core.vector_stores import MetadataFilter, MetadataFilters, FilterOperator, FilterCondition
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -68,21 +69,25 @@ _VERSION_RE = re.compile(r'\b7\.\d+(?:\.\d+)?\b')
 
 def _version_filters(query: str) -> MetadataFilters | None:
     """
-    If the query mentions an AMQ 7.x version string, return MetadataFilters
-    that restrict retrieval to documents for that version using exact $in
-    matching (ChromaDB 0.6.x has no substring operator).
+    If the query mentions one or more AMQ 7.x version strings, return
+    MetadataFilters that restrict retrieval to documents for those versions
+    using exact $in matching (ChromaDB 0.6.x has no substring operator).
+    When multiple versions are detected (e.g. "difference between 7.13 and
+    7.14"), filenames for all detected versions are included in a single $in
+    filter so cross-version comparison queries retrieve context from both.
     Returns None when no version is detected.
     """
-    versions = _VERSION_RE.findall(query)
+    versions = list(dict.fromkeys(_VERSION_RE.findall(query)))  # deduplicated, order-preserving
     if not versions:
         return None
-    # Use only the first detected version to keep the filter simple.
-    # Build the exact filenames that LlamaIndex stores in file_name metadata.
-    version = versions[0]
-    prefix = f"Red_Hat_AMQ_Broker-{version}-"
-    filenames = [
-        prefix + s.replace("{ver}", version) for s in _DOC_SUFFIXES
-    ]
+    # Build the exact filenames that LlamaIndex stores in file_name metadata,
+    # for every detected version, and merge them into one $in list.
+    filenames = []
+    for version in versions:
+        prefix = f"Red_Hat_AMQ_Broker-{version}-"
+        filenames.extend(
+            prefix + s.replace("{ver}", version) for s in _DOC_SUFFIXES
+        )
     return MetadataFilters(
         filters=[
             MetadataFilter(
@@ -100,6 +105,12 @@ def build_chat_engine(query: str | None = None):
     Build and return a chat engine.  When *query* is provided and contains
     an AMQ version number the retriever is scoped to documents for that
     version only, which prevents cross-version hallucinations.
+
+    QueryFusionRetriever rewrites the user's query into NUM_QUERY_REWRITES
+    alternative phrasings before retrieval.  This is critical for vague
+    comparative queries (e.g. "difference between 7.13 and 7.14") whose
+    literal wording doesn't appear in any document but whose rephrased forms
+    (e.g. "AMQ Broker 7.14 release notes new features") score well.
     """
     chroma_client     = chromadb.PersistentClient(path=CHROMA_PATH)
     chroma_collection = chroma_client.get_or_create_collection("artemis_docs")
@@ -110,12 +121,21 @@ def build_chat_engine(query: str | None = None):
 
     filters = _version_filters(query) if query else None
 
-    return index.as_chat_engine(
-        chat_mode="condense_plus_context",
-        memory=memory,
-        node_postprocessors=[SimilarityPostprocessor(similarity_cutoff=0.58)],
-        system_prompt=SYSTEM_PROMPT,
+    base_retriever = index.as_retriever(similarity_top_k=10, filters=filters)
+
+    retriever = QueryFusionRetriever(
+        retrievers=[base_retriever],
         similarity_top_k=10,
-        filters=filters,
+        num_queries=4,       # original + 3 LLM-generated rephrasings
+        mode="reciprocal_rerank",
+        use_async=False,
+        verbose=False,
+    )
+
+    return CondensePlusContextChatEngine.from_defaults(
+        retriever=retriever,
+        memory=memory,
+        node_postprocessors=[],
+        system_prompt=SYSTEM_PROMPT,
         verbose=False,
     )

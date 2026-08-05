@@ -299,6 +299,16 @@ async def on_message(message: cl.Message):
     for token in stream.response_gen:
         await msg.stream_token(token)
 
+    # Guard against blank responses (e.g. all retrieved chunks filtered out by
+    # the SimilarityPostprocessor — the LLM receives no context and may emit
+    # nothing rather than a proper "I don't know" reply).
+    if not (msg.content or "").strip():
+        msg.content = (
+            "I wasn't able to find relevant information in the documentation "
+            "to answer that question. Please try rephrasing, or ask something "
+            "related to AMQ Broker / Artemis configuration and operations."
+        )
+
     await msg.update()
 
     # Attach retrieved source documents as collapsible elements
