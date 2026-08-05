@@ -539,3 +539,89 @@ a.watermark {
   border-color: #6f6f6f !important;
   color:        #f4f4f4 !important;
 }
+
+/* ─────────────────────────────────────────────────────────
+   16. LEFT SIDEBAR CUSTOMISATIONS
+   DOM structure (from compiled Chainlit 2.5.5 source):
+     [data-sidebar="sidebar"]           – the sidebar panel div
+     [data-sidebar="menu-button"]       – each thread button
+     group/sidebar-wrapper              – wrapper that holds --sidebar-width var
+   Tooltip: Radix portal, renders as
+     [data-radix-popper-content-wrapper] > div[data-side="right"]
+   Thread names are inside <a> (RouterLink) wrapping [data-sidebar="menu-button"]
+──────────────────────────────────────────────────────────── */
+
+/* ── 16a. Resizable sidebar width ──
+   The sidebar panel uses w-[--sidebar-width] which reads from an inline style
+   var on the wrapper. We override the panel itself to be user-resizable.       */
+[data-sidebar="sidebar"] {
+  resize: horizontal !important;
+  overflow: hidden auto !important;
+  min-width: 160px !important;
+  max-width: 520px !important;
+}
+
+/* ── 16b. Neutral conversation / thread name color ──
+   Thread items render as:
+     <a> (RouterLink)
+       └─ <button data-sidebar="menu-button">  ← text color lives here
+   The global "a { color: #0043ce }" rule bleeds in through the RouterLink.
+   Override with Carbon neutral text for both link wrapper and button.          */
+[data-sidebar="sidebar"] a,
+[data-sidebar="menu-button"] {
+  color: hsl(var(--sidebar-foreground)) !important;
+  text-decoration: none !important;
+}
+[data-sidebar="sidebar"] a:hover,
+[data-sidebar="menu-button"]:hover {
+  color: hsl(var(--sidebar-accent-foreground)) !important;
+  text-decoration: none !important;
+}
+/* Active (selected) thread — keep it readable but not blue */
+[data-sidebar="menu-button"][data-active="true"] {
+  color: hsl(var(--sidebar-accent-foreground)) !important;
+}
+
+/* ── 16c. Hide thread-item tooltip ──
+   Each thread is wrapped in <Tooltip> (Radix), rendering a TooltipContent
+   that shows the thread name via a portal appended to <body>.
+   The content element carries data-side="right" (side prop passed in the JSX).
+   We target the Radix popper wrapper that has a sibling [data-side="right"].   */
+[data-radix-popper-content-wrapper]:has([data-side="right"]) {
+  display: none !important;
+}
+/* Broader fallback for browsers without :has() support */
+[data-side="right"][role="tooltip"],
+[data-side="right"].z-50 {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   17. DISABLE AUTO-SCROLL on message send
+   Chainlit calls scrollIntoView on the last message when the
+   user submits. Suppress the browser's scroll-anchoring and
+   smooth-scroll so the viewport stays put.
+──────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: auto !important;
+}
+
+/* The scrollable message list wrapper */
+[class*="messages"],
+[class*="message-list"],
+[class*="MessageList"],
+[data-testid="message-list"],
+main > div,
+#messages {
+  overflow-anchor: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Prevent every child element from acting as a scroll anchor */
+[class*="messages"] *,
+[class*="message-list"] *,
+main > div * {
+  overflow-anchor: none !important;
+}
