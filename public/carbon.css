@@ -613,6 +613,29 @@ body.sidebar-dragging [class*="transition-"] {
   color: hsl(var(--sidebar-accent-foreground)) !important;
 }
 
+/* ── 16d. Prevent three-dots menu trigger from turning red on hover ──
+   Chainlit applies hover:text-destructive on the DropdownMenuTrigger
+   inside each thread row. That Tailwind class compiles to a rule like:
+     .hover\:text-destructive:hover { color: hsl(var(--destructive)); }
+   We beat it two ways:
+   1. Directly override the compiled Tailwind utility class inside the sidebar.
+   2. Re-scope --destructive to neutral inside the sidebar so even if the
+      variable leaks through, it won't be red.                            */
+
+/* Override the compiled Tailwind hover:text-destructive utility */
+[data-sidebar="sidebar"] .hover\:text-destructive:hover,
+[data-sidebar="sidebar"] button:hover,
+[data-sidebar="sidebar"] button:hover *,
+[data-sidebar="sidebar"] [role="button"]:hover,
+[data-sidebar="sidebar"] [role="button"]:hover * {
+  color: hsl(var(--sidebar-foreground)) !important;
+}
+
+/* Scope --destructive to neutral inside the sidebar so it can't bleed red */
+[data-sidebar="sidebar"] {
+  --destructive: var(--sidebar-foreground);
+}
+
 /* ── 16c. Hide thread-item tooltip ──
    Each thread is wrapped in <Tooltip> (Radix), rendering a TooltipContent
    that shows the thread name via a portal appended to <body>.
