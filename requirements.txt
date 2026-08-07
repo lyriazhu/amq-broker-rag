@@ -5,3 +5,4 @@ llama-index-llms-ollama==0.5.0
 chromadb==0.6.3
 chainlit==2.5.5
 python-dotenv
+requests>=2.32.3
